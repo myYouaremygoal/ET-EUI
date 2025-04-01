@@ -13,6 +13,8 @@ namespace ET
         public const int LoadUIBaseWindows = 8;
         
         public const int LoginAccount = 9;  //登录账号时使用
+        public const int LoginCenterLock = 10; //登录中心服使用
+        public const int GateLoginLock = 11; //网关登录锁
 
         public const int Max = 100; // 这个必须最大
     }

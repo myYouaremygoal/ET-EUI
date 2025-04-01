@@ -12,6 +12,7 @@ namespace ET
             try
             {
                 accountSession = zoneScene.GetComponent<NetKcpComponent>().Create(NetworkHelper.ToIPEndPoint(address));
+                password =MD5Helper.StringToMD5(password);
                 a2CLoginAccount = (A2C_LoginAccount) await accountSession.Call(new C2A_LoginAccount(){AccountName  = account, PassWord = password} );
                 
             }
@@ -28,12 +29,50 @@ namespace ET
             }
 
             zoneScene.AddComponent<SessionComponent>().Session = accountSession;
+            zoneScene.GetComponent<SessionComponent>().Session.AddComponent<PingComponent>();
             
             zoneScene.GetComponent<AccountInfoComponent>().Token = a2CLoginAccount.Token;
             zoneScene.GetComponent<AccountInfoComponent>().AccountId = a2CLoginAccount.AccountId;
             
             
             return ErrorCode.ERR_Success;
-        } 
+        }
+
+
+        public static async ETTask<int> GetServerInfos(Scene zoneScene)
+        {
+            A2C_GetServerInfos a2CGetServerInfos = null;
+
+            try
+            {
+                a2CGetServerInfos = (A2C_GetServerInfos)await zoneScene.GetComponent<SessionComponent>().Session.Call(new C2A_GetServerInfos()
+                {
+                    AccountId = zoneScene.GetComponent<AccountInfoComponent>().AccountId,
+                    Token = zoneScene.GetComponent<AccountInfoComponent>().Token
+                });
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.ToString());
+            }
+
+            if (a2CGetServerInfos.Error !=ErrorCode.ERR_Success)
+            {
+                return a2CGetServerInfos.Error;
+            }
+
+            foreach (var serverInfoProto in a2CGetServerInfos.ServerInfosList)
+            {
+                ServerInfo serverInfo = zoneScene.GetComponent<ServerInfosComponent>().AddChild<ServerInfo>();
+                serverInfo.FromMessage(serverInfoProto);
+                
+                zoneScene.GetComponent<ServerInfosComponent>().Add(serverInfo);
+            }
+            
+            
+            await ETTask.CompletedTask;
+
+            return ErrorCode.ERR_Success;
+        }
     }
 }

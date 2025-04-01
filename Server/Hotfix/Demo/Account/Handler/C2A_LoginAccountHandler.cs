@@ -1,5 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
+using CommandLine;
 
 namespace ET
 {
@@ -40,7 +41,7 @@ namespace ET
                 session.Disconnect().Coroutine();  
                 return;
             }
-            if (Regex.IsMatch(request.PassWord.Trim(),@"^(?=.*[0-9.*])(?=.*[A-Z].*)(?=.*[a-z].*).{6,15}$"))
+            if (!Regex.IsMatch(request.PassWord.Trim(),@"^[A-Za-z0-9]+$"))
             {
                 response.Error = ErrorCode.ERR_PasswordFormError;
                 reply();
@@ -86,6 +87,29 @@ namespace ET
                         account.AccountType = (int)AccountType.General;
                         await DBManagerComponent.Instance.GetZoneDB(session.DomainZone()).Save<Account>(account);
                     }
+                    //账号服务器请求中心服
+                    StartSceneConfig startSceneConfig = StartSceneConfigCategory.Instance.GetBySceneName(session.DomainZone(), "LoginCenter");
+                    long loginCenterInstanceId = startSceneConfig.InstanceId;
+                    var  loginAccountResponse= (L2A_LoginAccountResponse) await ActorMessageSenderComponent.Instance.Call(loginCenterInstanceId, new A2L_LoginAccountRequest() { AccountId = account.Id });
+                    if (loginAccountResponse.Error != ErrorCode.ERR_Success)
+                    {
+                        response.Error = loginAccountResponse.Error; 
+                        
+                        reply();
+                        session.Disconnect().Coroutine();
+                        account.Dispose();
+                        return;
+                    }
+
+                    //判断是否已经登录顶号断开旧登录
+                    long accountSessionInstanceId = session.DomainScene().GetComponent<AccountSessionsComponent>().Get(account.Id);
+                    Session otherSession = Game.EventSystem.Get(accountSessionInstanceId) as Session;
+                    otherSession?.Send(new A2C_Disconnect { Error = 0});
+                    otherSession?.Disconnect().Coroutine();
+                    session.DomainScene().GetComponent<AccountSessionsComponent>().Add(account.Id,session.InstanceId);
+                    session.AddComponent<AcccountCheckOutTimeComponent, long>(account.Id);
+                    
+                    //创建新的登录Token
                     string Token = TimeHelper.ServerNow().ToString()+ RandomHelper.RandomNumber(int.MaxValue,int.MaxValue).ToString();
                     session.DomainScene().GetComponent<TokenComponent>().Remove(account.Id);
                     session.DomainScene().GetComponent<TokenComponent>().Add(account.Id, Token);
@@ -94,7 +118,7 @@ namespace ET
                     response.Token = Token;
                 
                     reply();
-                    session?.Dispose();
+                    account?.Dispose();
                 }
             }
             

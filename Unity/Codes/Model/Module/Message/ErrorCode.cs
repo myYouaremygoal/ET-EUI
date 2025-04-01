@@ -17,19 +17,19 @@ namespace ET
         /// <summary>
         /// 网络错误
         /// </summary>
-        public const int ERR_NetWorkError = 200002;
+        public const int ERR_NetWorkError            = 200002;
         /// <summary>
         /// 账号信息错误
         /// </summary>
-        public const int ERR_LoginInfoIsNull = 200003;
+        public const int ERR_LoginInfoIsNull         = 200003;
         /// <summary>
         /// 登录账号格式错误
         /// </summary>
-        public const int ERR_AccountNameFormError = 200004;
+        public const int ERR_AccountNameFormError    = 200004;
         /// <summary>
         /// 登录密码格式错误
         /// </summary>
-        public const int ERR_PasswordFormError = 200005;
+        public const int ERR_PasswordFormError       = 200005;
         /// <summary>
         /// 账号处于黑名单中
         /// </summary>
@@ -37,11 +37,15 @@ namespace ET
         /// <summary>
         /// 登录密码错误
         /// </summary>
-        public const int ERR_LoginPasswordError = 200007;
+        public const int ERR_LoginPasswordError      = 200007;
         /// <summary>
         /// 多次请求
         /// </summary>
-        public const int ERR_RequestRepeatedly = 200008;
+        public const int ERR_RequestRepeatedly       = 200008;
+        /// <summary>
+        /// Token错误
+        /// </summary>
+        public const int ERR_TokenError              = 200009;
         
     }
 }
