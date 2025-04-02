@@ -12,7 +12,7 @@ namespace ET
 
 		public static void RegisterUIEvent(this DlgLogin self)
 		{
-			self.View.E_LoginButton.AddListenerAsync(() => { return self.OnLoginClickHandler();});
+			self.View.E_LoginButton.AddListenerAsync(() => { return  self.OnLoginClickHandler();});
 		}
 
 		public static void ShowWindow(this DlgLogin self, Entity contextData = null)
@@ -35,9 +35,17 @@ namespace ET
 				   return;
 			   }
 			   
+			   errorCode = await LoginHelper.GetServerInfos(self.ZoneScene());
+
+			   if (errorCode != ErrorCode.ERR_Success)
+			   {
+				   Log.Error("获取服务器信息失败");
+				   return;
+			   }
+			   
 			   //TODO 显示登录之后的页面逻辑
-			   self.DomainScene().GetComponent<UIComponent>().HideWindow(WindowID.WindowID_Login);
-			   self.DomainScene().GetComponent<UIComponent>().ShowWindow(WindowID.WindowID_Lobby);
+			   self.DomainScene().GetComponent<UIComponent>().HideWindow(WindowID.WindowID_Role);
+			   self.DomainScene().GetComponent<UIComponent>().ShowWindow(WindowID.WindowID_SeverInfo);
 			   
 			}
 			catch (Exception e)

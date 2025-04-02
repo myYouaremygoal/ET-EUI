@@ -29,6 +29,7 @@ namespace ET
     }
 
 
+    [FriendClass(typeof(ServerInfo))]
     [FriendClass(typeof(SeverInfoManagerComponent))]
     public static class SeverInfoManagerComponentSystem
     {
@@ -39,6 +40,19 @@ namespace ET
             if (serverInfoList ==null || serverInfoList.Count <=0)
             {
                 Log.Error("serverInfo count is zero");
+                self.ServerInfos.Clear();   
+                var serverInfoConfigs = ServerInfoConfigCategory.Instance.GetAll();
+
+                foreach (var  info in serverInfoConfigs.Values)
+                {
+                    ServerInfo newServerInfo = self.AddChildWithId<ServerInfo>(info.Id);
+                    newServerInfo.ServerName = info.ServerName;
+                    newServerInfo.Status = (int)ServerStatus.Normal;
+                    self.ServerInfos.Add(newServerInfo);
+                    await DBManagerComponent.Instance.GetZoneDB(self.DomainZone()).Save(newServerInfo); 
+                }
+                
+                
                 return;
             }
             self.ServerInfos.Clear();

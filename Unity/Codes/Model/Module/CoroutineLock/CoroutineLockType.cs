@@ -15,6 +15,9 @@ namespace ET
         public const int LoginAccount = 9;  //登录账号时使用
         public const int LoginCenterLock = 10; //登录中心服使用
         public const int GateLoginLock = 11; //网关登录锁
+        
+        public const int CreateRole = 12; //创建角色锁
+        
 
         public const int Max = 100; // 这个必须最大
     }
